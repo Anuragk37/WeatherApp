@@ -12,7 +12,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import Dashboard from './Pages/Dashboard';
 import AdminLogin from './Pages/AdminLogin';
 import UserManagement from './Pages/UserManagement';
-import UserProtecredRoute from './utils/userProtectRoute';
+import UserProtectedRoute from './utils/userProtectRoute';
 
 function App() {
   
@@ -24,7 +24,7 @@ function App() {
     },
     {
       path: "/dashboard",
-      element: <UserProtecredRoute ><Dashboard /> </UserProtecredRoute>
+      element: <UserProtectedRoute ><Dashboard /> </UserProtectedRoute>
     },
     {
       path: "/admin-login",

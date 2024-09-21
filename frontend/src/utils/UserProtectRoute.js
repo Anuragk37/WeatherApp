@@ -1,7 +1,7 @@
 import React,{useEffect} from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-const UserProtecredRoute = ({children}) => {
+const UserProtectedRoute = ({children}) => {
    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated)
    const navigate = useNavigate()
 
@@ -14,4 +14,4 @@ const UserProtecredRoute = ({children}) => {
   return children
 }
 
-export default UserProtecredRoute
+export default UserProtectedRoute
