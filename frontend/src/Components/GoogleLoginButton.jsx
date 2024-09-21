@@ -2,14 +2,23 @@ import React from 'react'
 import { FaGoogle } from 'react-icons/fa'
 import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { loginSuccess } from '../features/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 const GoogleLoginButton = () => {
+
+   const dispatch = useDispatch();
+   const navigate = useNavigate();
 
    const handleSuccess = async(codeResponse) => {
       try{
         console.log(codeResponse);
         
          const response = await axios.post('http://127.0.0.1:8000/api/account/login-with-google/', {"code": codeResponse.code})
+
+         dispatch(loginSuccess(response.data));
+         navigate('/dashboard')
          console.log(response)
       }catch(error){
          console.log(error)

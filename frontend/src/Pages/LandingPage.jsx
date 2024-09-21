@@ -1,8 +1,10 @@
 import React from 'react';
 import { FaSun, FaCloud } from 'react-icons/fa';
 import  GoogleLoginButton  from '../Components/GoogleLoginButton';
-
+import { useSelector } from 'react-redux';
 const LandingPage = () => {
+
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
  
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-400 to-blue-600 flex flex-col items-center justify-center text-white p-4">
@@ -15,7 +17,11 @@ const LandingPage = () => {
         <p className="text-xl mb-8">
           Your personal weather companion. Get accurate forecasts and real-time updates, all in one place.
         </p>
-        <GoogleLoginButton />
+        {!isAuthenticated ? (
+          <GoogleLoginButton />
+        ) : (
+          <p className="text-xl">You are already logged in.</p>
+        )}
       </div>
       <footer className="mt-16 text-sm opacity-75">
         © 2024 WeatherNow. All rights reserved.
