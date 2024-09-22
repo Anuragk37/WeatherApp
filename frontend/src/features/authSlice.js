@@ -17,7 +17,7 @@ const authSlice = createSlice({
       state.refreshToken = action.payload.refresh;
       state.role = action.payload.role;
       state.isAuthenticated = true;
-      // Store tokens in localStorage
+
       localStorage.setItem('accessToken', action.payload.access);
       localStorage.setItem('refreshToken', action.payload.refresh);
       localStorage.setItem('role', action.payload.role);
@@ -27,7 +27,7 @@ const authSlice = createSlice({
       state.refreshToken = null;
       state.role = null;
       state.isAuthenticated = false;
-      // Remove tokens from localStorage
+      
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('role');

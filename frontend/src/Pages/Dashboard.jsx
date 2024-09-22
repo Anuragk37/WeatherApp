@@ -7,13 +7,13 @@ import Header from '../Components/Header';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const { user, role } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const { data, loading, error } = useSelector((state) => state.weather);
-  const [city, setCity] = useState('New York');
+  const [city, setCity] = useState('');
 
   useEffect(() => {
-    dispatch(fetchWeatherData(city));
-  }, [dispatch, city]);
+    dispatch(fetchWeatherData('kerala'));
+  }, [dispatch]);
 
   const processData = () => {
     if (!data || !data.list) return [];
@@ -48,6 +48,25 @@ const Dashboard = () => {
     }
   };
 
+  const handleSearch = () => {
+    dispatch(fetchWeatherData(city));
+    setCity('');
+  };
+
+  const handleGetCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+         
+        const { latitude, longitude } = position.coords;
+        dispatch(fetchWeatherData(position.coords)); // Fetch weather using coordinates
+      }, (error) => {
+        console.error("Error getting location: ", error);
+      });
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-200">
       <Header />
@@ -68,11 +87,18 @@ const Dashboard = () => {
               <FaMapMarkerAlt className="absolute left-3 top-3 text-indigo-400" />
             </div>
             <button
-              onClick={() => dispatch(fetchWeatherData(city))}
+              onClick={handleSearch}
               className="w-full md:w-auto bg-indigo-600 text-white px-6 py-2 rounded-full hover:bg-indigo-700 transition duration-300 flex items-center justify-center"
             >
               <FaSearch className="mr-2" />
               Search
+            </button>
+            <button
+              onClick={handleGetCurrentLocation}
+              className="ml-4 w-full md:w-auto bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition duration-300 flex items-center justify-center"
+            >
+              <FaMapMarkerAlt className="mr-2" />
+              Current Location
             </button>
           </div>
 
@@ -85,7 +111,7 @@ const Dashboard = () => {
                 <div className="mb-4 md:mb-0 text-center md:text-left">
                   <h2 className="text-3xl font-bold mb-2 flex items-center justify-center md:justify-start">
                     <FaMapMarkerAlt className="mr-2" />
-                    {city}
+                    {data.city.name}
                   </h2>
                   <p className="text-xl flex items-center justify-center md:justify-start">
                     {getWeatherIcon(currentWeather.weather[0].description)}
@@ -161,7 +187,6 @@ const Dashboard = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Temperature (°C)</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Humidity (%)</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wind Speed (m/s)</th>
@@ -170,13 +195,12 @@ const Dashboard = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {processedData.map((item, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.date}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.time}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.temperature.toFixed(1)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.humidity}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.windSpeed}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.description}</td>
+                  <tr key={index}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.date}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.temperature.toFixed(1)}°C</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.humidity}%</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.windSpeed} m/s</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.description}</td>
                   </tr>
                 ))}
               </tbody>
