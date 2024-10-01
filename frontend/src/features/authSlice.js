@@ -2,10 +2,10 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  accessToken:  null,
-  refreshToken: null,
-  isAuthenticated: false,
-  role: null
+  accessToken: localStorage.getItem('accessToken') ? localStorage.getItem('accessToken') : null,
+  refreshToken: localStorage.getItem('refreshToken') ? localStorage.getItem('refreshToken') : null,
+  isAuthenticated: !!localStorage.getItem('accessToken'),
+  role: localStorage.getItem('role') ? localStorage.getItem('role') : null
 };
 
 const authSlice = createSlice({

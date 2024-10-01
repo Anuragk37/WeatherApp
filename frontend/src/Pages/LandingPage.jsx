@@ -23,9 +23,6 @@ const LandingPage = () => {
           <p className="text-xl">You are already logged in.</p>
         )}
       </div>
-      <footer className="mt-16 text-sm opacity-75">
-        © 2024 WeatherNow. All rights reserved.
-      </footer>
     </div>
   );
 };

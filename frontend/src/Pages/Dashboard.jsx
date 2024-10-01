@@ -12,7 +12,7 @@ const Dashboard = () => {
   const [city, setCity] = useState('');
 
   useEffect(() => {
-    dispatch(fetchWeatherData('New York'));
+    dispatch(fetchWeatherData('Kerala'));
   }, [dispatch]);
 
   const processData = () => {
