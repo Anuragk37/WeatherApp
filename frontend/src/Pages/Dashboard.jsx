@@ -12,7 +12,7 @@ const Dashboard = () => {
   const [city, setCity] = useState('');
 
   useEffect(() => {
-    dispatch(fetchWeatherData('kerala'));
+    dispatch(fetchWeatherData('New York'));
   }, [dispatch]);
 
   const processData = () => {
@@ -49,16 +49,17 @@ const Dashboard = () => {
   };
 
   const handleSearch = () => {
-    dispatch(fetchWeatherData(city));
-    setCity('');
+    if (city.trim()) {
+      dispatch(fetchWeatherData(city));
+      setCity('');
+    }
   };
 
   const handleGetCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
-         
         const { latitude, longitude } = position.coords;
-        dispatch(fetchWeatherData(position.coords)); // Fetch weather using coordinates
+        dispatch(fetchWeatherData({ latitude, longitude }));
       }, (error) => {
         console.error("Error getting location: ", error);
       });
@@ -103,7 +104,7 @@ const Dashboard = () => {
           </div>
 
           {loading && <div className="text-center text-indigo-600">Loading weather data...</div>}
-          {error && <div className="text-center text-red-500 bg-red-100 p-4 rounded-lg">Error: {error}</div>}
+          {error && <div data-testid="error-message" className="text-center text-red-500 bg-red-100 p-4 rounded-lg">Error: {error}</div>}
 
           {currentWeather && (
             <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl p-6 shadow-lg">
@@ -111,25 +112,25 @@ const Dashboard = () => {
                 <div className="mb-4 md:mb-0 text-center md:text-left">
                   <h2 className="text-3xl font-bold mb-2 flex items-center justify-center md:justify-start">
                     <FaMapMarkerAlt className="mr-2" />
-                    {data.city.name}
+                    <span data-testid="city-name">{data.city.name}</span>
                   </h2>
                   <p className="text-xl flex items-center justify-center md:justify-start">
                     {getWeatherIcon(currentWeather.weather[0].description)}
-                    <span className="ml-2">{currentWeather.weather[0].description}</span>
+                    <span data-testid="weather-description" className="ml-2">{currentWeather.weather[0].description}</span>
                   </p>
                 </div>
                 <div className="text-center md:text-right">
                   <p className="text-5xl font-bold mb-2 flex items-center justify-center md:justify-end">
                     <FaThermometerHalf className="mr-2" />
-                    {currentWeather.main.temp.toFixed(1)}°C
+                    <span data-testid="current-temperature">{currentWeather.main.temp.toFixed(1)}°C</span>
                   </p>
                   <p className="text-lg flex items-center justify-center md:justify-end">
                     <FaTint className="mr-2" />
-                    Humidity: {currentWeather.main.humidity}%
+                    <span data-testid="current-humidity">Humidity: {currentWeather.main.humidity}%</span>
                   </p>
                   <p className="text-lg flex items-center justify-center md:justify-end mt-2">
                     <FaWind className="mr-2" />
-                    Wind: {currentWeather.wind.speed} m/s
+                    <span data-testid="current-wind-speed">Wind: {currentWeather.wind.speed} m/s</span>
                   </p>
                 </div>
               </div>
@@ -138,74 +139,74 @@ const Dashboard = () => {
         </div>
 
         {data && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <div className="bg-white p-6 rounded-xl shadow-xl">
-              <h2 className="text-2xl font-semibold mb-4 flex items-center text-indigo-800">
-                <FaThermometerHalf className="mr-2 text-indigo-500" />
-                Temperature Trend
-              </h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={processedData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Area type="monotone" dataKey="temperature" stroke="#8884d8" fill="#8884d8" fillOpacity={0.3} />
-                </AreaChart>
-              </ResponsiveContainer>
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              <div className="bg-white p-6 rounded-xl shadow-xl">
+                <h2 className="text-2xl font-semibold mb-4 flex items-center text-indigo-800">
+                  <FaThermometerHalf className="mr-2 text-indigo-500" />
+                  Temperature Trend
+                </h2>
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={processedData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="time" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Area type="monotone" dataKey="temperature" stroke="#8884d8" fill="#8884d8" fillOpacity={0.3} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow-xl">
+                <h2 className="text-2xl font-semibold mb-4 flex items-center text-indigo-800">
+                  <FaTint className="mr-2 text-blue-500" />
+                  Humidity and Wind Speed
+                </h2>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={processedData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="time" />
+                    <YAxis yAxisId="left" />
+                    <YAxis yAxisId="right" orientation="right" />
+                    <Tooltip />
+                    <Legend />
+                    <Line yAxisId="left" type="monotone" dataKey="humidity" stroke="#82ca9d" strokeWidth={2} />
+                    <Line yAxisId="right" type="monotone" dataKey="windSpeed" stroke="#ffc658" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-xl">
+            <div className="bg-white p-6 rounded-xl shadow-xl overflow-x-auto">
               <h2 className="text-2xl font-semibold mb-4 flex items-center text-indigo-800">
-                <FaTint className="mr-2 text-blue-500" />
-                Humidity and Wind Speed
+                <FaCloud className="mr-2 text-indigo-500" />
+                Weather Forecast Table
               </h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={processedData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip />
-                  <Legend />
-                  <Line yAxisId="left" type="monotone" dataKey="humidity" stroke="#82ca9d" strokeWidth={2} />
-                  <Line yAxisId="right" type="monotone" dataKey="windSpeed" stroke="#ffc658" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        )}
-
-        {data && (
-          <div className="bg-white p-6 rounded-xl shadow-xl overflow-x-auto">
-            <h2 className="text-2xl font-semibold mb-4 flex items-center text-indigo-800">
-              <FaCloud className="mr-2 text-indigo-500" />
-              Weather Forecast Table
-            </h2>
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Temperature (°C)</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Humidity (%)</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wind Speed (m/s)</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {processedData.map((item, index) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.date}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.temperature.toFixed(1)}°C</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.humidity}%</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.windSpeed} m/s</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.description}</td>
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Temperature (°C)</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Humidity (%)</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wind Speed (m/s)</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {processedData.map((item, index) => (
+                    <tr key={index}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.date}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.temperature.toFixed(1)}°C</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.humidity}%</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.windSpeed} m/s</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </main>
     </div>

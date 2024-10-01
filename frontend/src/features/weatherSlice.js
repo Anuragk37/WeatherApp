@@ -1,56 +1,63 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const API_KEY = '3919b2f01d9c5a2712acaa4ef6df1eba';
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
-export const fetchWeatherData = createAsyncThunk(
-  'weather/fetchWeatherData',
-  async (location) => {
-    let response;
-
-    // Check if location is an object with latitude and longitude
-    if (typeof location === 'object') {     
-      // response = await axios.get(`${BASE_URL}/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
-      response = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=${location.latitude}&lon=${location.longitude}&appid=${API_KEY}&units=metric`);
-      console.log("response with coordinates", response.data);
-      
-    } else {
-      // Default to city name query
-      console.log("lattttt lofgggggggg",typeof location, location);
-      
-      response = await axios.get(`${BASE_URL}/forecast?q=${location}&appid=${API_KEY}&units=metric`);
-      console.log("response with city", response.data);
-      
-    }
-
-    return response.data;
-  }
-);
+const initialState = {
+  data: null,
+  loading: false,
+  error: null,
+};
 
 const weatherSlice = createSlice({
   name: 'weather',
-  initialState: {
-    data: null,
-    loading: false,
-    error: null,
-  },
-  reducers: {},
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchWeatherData.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchWeatherData.fulfilled, (state, action) => {
-        state.loading = false;
-        state.data = action.payload;
-      })
-      .addCase(fetchWeatherData.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message;
-      });
+  initialState,
+  reducers: {
+    fetchWeatherStart(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchWeatherSuccess(state, action) {
+      state.loading = false;
+      state.data = action.payload;
+    },
+    fetchWeatherFailure(state, action) {
+      state.loading = false;
+      state.error = "location not found";
+    },
   },
 });
+
+export const { fetchWeatherStart, fetchWeatherSuccess, fetchWeatherFailure } = weatherSlice.actions;
+
+// Action creator for fetching weather data
+export const fetchWeatherData = (location) => async (dispatch) => {
+  dispatch(fetchWeatherStart());
+  try {
+    let response;
+    if (typeof location === 'object' && location.latitude && location.longitude) {
+      response = await axios.get(`${BASE_URL}/forecast`, {
+        params: {
+          lat: location.latitude,
+          lon: location.longitude,
+          appid: API_KEY,
+          units: 'metric',
+        },
+      });
+    } else {
+      response = await axios.get(`${BASE_URL}/forecast`, {
+        params: {
+          q: location,
+          appid: API_KEY,
+          units: 'metric',
+        },
+      });
+    }
+    dispatch(fetchWeatherSuccess(response.data));
+  } catch (error) {
+    dispatch(fetchWeatherFailure(error.message));
+  }
+};
 
 export default weatherSlice.reducer;

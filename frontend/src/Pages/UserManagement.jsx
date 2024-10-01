@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { FaSearch, FaUserCircle } from 'react-icons/fa';
 import axiosInstance from '../utils/axiosInstance';
+import { toast, ToastContainer } from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css'
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -19,13 +21,39 @@ const UserManagement = () => {
     getUsers();
   }, []);
 
-  const handleBlockUser = async (id) => {
+  const handleBlockUser = async (id, isActive) => {
     try {
       await axiosInstance.patch(`/account/block-user/${id}/`);
       getUsers();
+      toast.success(`User ${isActive ? 'blocked' : 'unblocked'} successfully!`);
     } catch (error) {
-      console.error('Error blocking/unblocking user:', error);
+      toast.error('Error blocking/unblocking user.');
     }
+  };
+
+  const confirmBlockUser = (id, isActive) => {
+    toast.info(
+      <>
+        <div className="font-bold mb-2">
+          Are you sure you want to {isActive ? 'block' : 'unblock'} this user?
+        </div>
+        <div className="flex justify-around mt-2">
+          <button
+            onClick={() => handleBlockUser(id, isActive)}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full"
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => toast.dismiss()}
+            className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-full"
+          >
+            No
+          </button>
+        </div>
+      </>,
+      { autoClose: true, closeOnClick: true, position:'top-center' }
+    );
   };
 
   const filteredUsers = users.filter(user =>
@@ -35,6 +63,7 @@ const UserManagement = () => {
 
   return (
     <div className="bg-gradient-to-br from-purple-100 to-blue-100 min-h-screen p-8">
+      <ToastContainer />
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden">
         <div className="p-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-8">User Management</h1>
@@ -75,7 +104,7 @@ const UserManagement = () => {
                     <td className="py-3 px-4 border-b">{user.email}</td>
                     <td className="py-3 px-4 border-b">
                       <button
-                        onClick={() => handleBlockUser(user.id)}
+                        onClick={() => confirmBlockUser(user.id, user.is_active)}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition duration-300 ${
                           user.is_active
                             ? 'bg-red-500 text-white hover:bg-red-600'

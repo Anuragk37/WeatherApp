@@ -13,10 +13,7 @@ const GoogleLoginButton = () => {
 
    const handleSuccess = async(codeResponse) => {
       try{
-        console.log(codeResponse);
-        
          const response = await axiosInstance.post('/account/login-with-google/', {"code": codeResponse.code})
-
          dispatch(loginSuccess(response.data));
          navigate('/dashboard')
          console.log(response)

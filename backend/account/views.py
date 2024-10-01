@@ -95,7 +95,6 @@ class AdminLoginView(APIView):
         if not user.is_superuser:
             return Response({'error': 'You are not authorized to access this resource'}, status=status.HTTP_403_FORBIDDEN)
 
-        # Create JWT tokens
         refresh = RefreshToken.for_user(user)
         return Response({
             'refresh': str(refresh),
